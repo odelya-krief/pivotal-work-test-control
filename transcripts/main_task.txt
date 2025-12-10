@@ -1,0 +1,82 @@
+
+My prompt:
+Can u write an sql health check for my sql server ?
+It should run every 30 seconds it should be in python, and then inside it should have sql script .
+Use a connection pool. In this health check i want u to check various scenarios: like select *, select top, join 2
+tables called sessions and users by the uid. please write pure sql, and python, without any comments or documentation
+inside the code or in your output. thanks
+
+The answer (Cluase Sonnet 4.5)
+
+import pyodbc
+import time
+from queue import Queue
+from threading import Lock
+
+class ConnectionPool:
+    def __init__(self, connection_string, pool_size=5):
+        self.connection_string = connection_string
+        self.pool_size = pool_size
+        self.pool = Queue(maxsize=pool_size)
+        self.lock = Lock()
+        self._initialize_pool()
+    
+    def _initialize_pool(self):
+        for _ in range(self.pool_size):
+            conn = pyodbc.connect(self.connection_string)
+            self.pool.put(conn)
+    
+    def get_connection(self):
+        return self.pool.get()
+    
+    def return_connection(self, conn):
+        self.pool.put(conn)
+    
+    def close_all(self):
+        while not self.pool.empty():
+            conn = self.pool.get()
+            conn.close()
+
+def execute_health_check(pool):
+    conn = pool.get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("SELECT * FROM sessions")
+        cursor.fetchall()
+        
+        cursor.execute("SELECT TOP 10 * FROM users")
+        cursor.fetchall()
+        
+        cursor.execute("""
+            SELECT s.*, u.*
+            FROM sessions s
+            INNER JOIN users u ON s.uid = u.uid
+        """)
+        cursor.fetchall()
+        
+        print(f"Health check passed at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+    except Exception as e:
+        print(f"Health check failed: {str(e)}")
+    
+    finally:
+        cursor.close()
+        pool.return_connection(conn)
+
+def main():
+    connection_string = "DRIVER={SQL Server};SERVER=your_server;DATABASE=your_database;UID=your_username;PWD=your_password"
+    
+    pool = ConnectionPool(connection_string, pool_size=5)
+    
+    try:
+        while True:
+            execute_health_check(pool)
+            time.sleep(30)
+    except KeyboardInterrupt:
+        print("Stopping health check...")
+    finally:
+        pool.close_all()
+
+if __name__ == "__main__":
+    main()
