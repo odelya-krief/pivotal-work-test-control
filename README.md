@@ -25,6 +25,7 @@ A correct, safe health-check script using a connection pool and several SQL quer
 **Transcript:**  
 [See transcript](transcripts/main_task.txt).
 
+
 **Link to conversation:**
 https://claude.ai/share/acc54070-ff62-49e7-b309-44dbd8065d3c
 ---
@@ -62,6 +63,7 @@ The AI produced a version of the health-check that:
 
 **Transcript:**  
 [See transcript](transcripts/side_task.txt).
+
 
 **Link to conversation:**
 https://claude.ai/share/f16a06c6-413e-49cb-a6d7-db2f71e491e0
