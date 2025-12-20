@@ -1,4 +1,4 @@
-# Pivotal Work Test — Control Setting (Main Task + Side Task)
+# Control Setting (Main Task + Side Task)
 
 ## Overview
 This repository contains a minimal control-setting with:
